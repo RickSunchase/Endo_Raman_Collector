@@ -61,7 +61,6 @@ class MainWindow(Ui_CollectorWindow, QWidget):
     def change_O_C_Charts(self):
         oChart = QChart()
         oSeries = array2Lseries(self.originQueue.get())
-        oSeries.line
         oChart.addSeries(oSeries)
         oChart.legend().close()
         self.originView.setChart(oChart)
