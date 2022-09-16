@@ -165,7 +165,7 @@ class Ui_CollectorWindow(object):
 "}")
         self.pushButton_del.setText("")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("C:/Users/fire-/Desktop/usertrashfull_92826.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
+        icon.addPixmap(QtGui.QPixmap("./img/usertrashfull_92826.svg"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         self.pushButton_del.setIcon(icon)
         self.pushButton_del.setIconSize(QtCore.QSize(56, 56))
         self.pushButton_del.setObjectName("pushButton_del")

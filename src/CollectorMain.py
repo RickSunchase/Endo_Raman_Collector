@@ -168,11 +168,12 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         try:
             folder_escort()
         except:
-            pass
+            print('移不动')
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon("./img/accessibility.ico"))
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
