@@ -87,11 +87,11 @@ class Worker(QThread):
                 self.signin.release()  # 打卡上班
             noTimeout = True
             try:
-                targetFile = self.tasks.get(timeout=20)
+                targetFile = self.tasks.get(timeout=7)
             except:
                 # 20秒没收到的话就解锁查看重来一次
                 if self.stopFlag:
-                    print(str(self.id)+"号工人恶意不加班")
+                    self.chair.unlock()
                     break
                 else:
                     noTimeout = False
@@ -128,6 +128,7 @@ class Worker(QThread):
 
             self.chair.lock()
             self.buttonEnable.emit(False)
+        return
 
     def __del__(self):
-        print(str(self.id)+"号工人下班")
+        print(str(self.id)+'下岗')

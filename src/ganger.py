@@ -21,19 +21,15 @@ class Ganger(QThread):
         self.stopFlag = True
 
     def run(self):
-        while True:
-            self.__lock.lock()
-            if self.stopFlag:
-                print('工头可以下班')
-                break
+        while not self.stopFlag:
+            if not self.__lock.tryLock(7):
+                continue
             if self.signin.tryAcquire(1, 7):
-                if self.stopFlag:
-                    print('工头可以下班')
-                    break
-                else:
-                    self.__udpSender.sendto(
-                        'c'.encode('gbk'), ('127.0.0.1', 52169))
+                self.__udpSender.sendto(
+                    'c'.encode('gbk'), ('127.0.0.1', 52169))
+        return
 
     def __del__(self):
+        self.__lock.unlock()
         self.__udpSender.close()
-        print('工头退出')
+        print('工头跑路')

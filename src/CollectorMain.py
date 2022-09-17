@@ -14,7 +14,7 @@ from receiver import Receiver
 from all_in_one_preprocess import *
 from ui_CollectorWindow import Ui_CollectorWindow
 import multiprocessing
-
+import socket
 
 class MainWindow(Ui_CollectorWindow, QWidget):
     chageCharts = pyqtSignal()
@@ -56,8 +56,12 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         self.catsQueue = queue.Queue(1)
         self.predQueue = queue.Queue(1)
 
-    # 用信号改变上面两个视图
+        self.udpServer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.udpServer.settimeout(7)
+        self.udpServer.bind(('127.0.0.1', 7219))
+        Receiver.udpServer = self.udpServer
 
+    # 用信号改变上面两个视图
     def change_O_C_Charts(self):
         oChart = QChart()
         oSeries = array2Lseries(self.originQueue.get())
@@ -69,7 +73,6 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         cChart.addSeries(cSeries)
         cChart.legend().close()
         self.catView.setChart(cChart)
-
 
     def change_C_P_Series(self, index):
         self.cSeriesList[index] = array2Lseries(self.catsQueue.get())
@@ -101,7 +104,7 @@ class MainWindow(Ui_CollectorWindow, QWidget):
                 self.btns[i].setChecked(False)
 
     def startF(self):
-        
+
         self.obsPath = QFileDialog.getExistingDirectory(
             self, "选择监视路径", 'D:\\内窥镜 -20190612\\201906\\Data\\')
         if not self.obsPath:
@@ -138,30 +141,36 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         Receiver.avgPath = self.avgPath
         Receiver.meanQ = meanQueue
         # 关联工作发放队列
+        keeprunning = True
 
         self.workers = [Worker(i) for i in range(9)]  # 9个打工人
-        receiver = Receiver()
-        ganger = Ganger()
+        self.receiver = Receiver()
+        self.ganger = Ganger()
         for worker in self.workers:
             worker.buttonEnable.connect(self.btns[worker.id].setEnabled)
             self.pushButton_stop.clicked.connect(worker.stopsig)
-            receiver.saveFileSignal.connect(worker.savesig)
+            self.receiver.saveFileSignal.connect(worker.savesig)
             worker.sendUpper.connect(self.chageCharts)
             worker.sendLower.connect(self.changeSeries)
             worker.deleteLower.connect(self.specEraser)
             worker.setTable.connect(
                 lambda r, f: self.tableWidget.setItem(r, 0, QTableWidgetItem(f)))
+            worker.finished.connect(worker.deleteLater)
             worker.start()
-        receiver.unlockGanger.connect(ganger.sendsig)
-        self.pushButton_stop.clicked.connect(receiver.stopsig)
-        self.pushButton_stop.clicked.connect(ganger.stopsig)
-        receiver.start()
-        ganger.start()
+        self.receiver.unlockGanger.connect(self.ganger.sendsig)
+        self.pushButton_stop.clicked.connect(self.receiver.stopsig)
+        self.pushButton_stop.clicked.connect(self.ganger.stopsig)
+        self.pushButton_stop.clicked.connect(
+            lambda: self.pushButton_stop.setDisabled(True))
+        self.pushButton_stop.clicked.connect(
+            lambda: self.pushButton_start.setEnabled(True))
+        self.receiver.start()
+        self.ganger.start()
 
-        receiver.exec()
-        ganger.exec()
-        for worker in self.workers:
-            worker.exec()
+        # receiver.exec()
+        # ganger.exec()
+        # for worker in self.workers:
+        #     worker.exec()
 
     def closeEvent(self, Event):
         try:

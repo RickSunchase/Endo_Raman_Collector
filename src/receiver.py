@@ -19,14 +19,13 @@ class Receiver(QThread):
     unlockGanger = pyqtSignal()
     meanQ: multiprocessing.Queue
     signin: QSemaphore
+    udpServer:socket.socket
 
     def __init__(self):
         super().__init__()
-        self.udpServer = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.udpServer.settimeout(7)
-        self.udpServer.bind(('127.0.0.1', 7219))
         self.stopFlag = False
         self.stopsig.connect(self.on_stop)
+
 
     def on_stop(self):
         self.stopFlag = True
@@ -38,17 +37,16 @@ class Receiver(QThread):
                 data = self.udpServer.recvfrom(128)
             except:
                 if self.stopFlag:
-                    print('接收者可以下班')
                     if prefile:
-                        self.saveFileSignal.emit(os.path.split(prefile)[1])
                         n = 9 - self.signin.available()
                         msaver = self.Msaver(n, False)
                         msaver.fname = os.path.split(prefile)[1]+'.txt'
                         msaver.dst = self.avgPath
                         msaver.meanQ = self.meanQ
                         msaver.start()
+                        self.saveFileSignal.emit(os.path.split(prefile)[1])
+                        self.unlockGanger.emit()
                         msaver.join()
-                    self.unlockGanger.emit()
                     break
                 else:
                     continue
@@ -64,15 +62,16 @@ class Receiver(QThread):
                     msaver.fname = os.path.split(prefile)[1]+'.txt'
                     msaver.dst = self.avgPath
                     msaver.meanQ = self.meanQ
-                    msaver.start()
                     self.saveFileSignal.emit(os.path.split(prefile)[1])
+                    msaver.start()
 
                 prefile = newest[:-13]
                 self.unlockGanger.emit()
+        return
 
     def __del__(self):
-        self.udpServer.close()
-        print('接收者退出')
+        # self.udpServer.close()
+        print('收发室关门')
 
     class Msaver(multiprocessing.Process):
         fname: str
@@ -85,7 +84,6 @@ class Receiver(QThread):
             self.n = num
 
         def run(self):
-
             datas = np.array([])
             for i in range(self.n):
                 spec, pref = self.meanQ.get()
@@ -99,6 +97,7 @@ class Receiver(QThread):
             spec[1, :] = rp.smooth(spec[0, :], spec[1, :],  Lambda=500)
             spec[1, :] = norm_Area(spec[1, :])
             saveFile(self.fname, self.dst, pref, spec.transpose())
+            return
 
         def __del__(self):
             print('进程自己退出')
