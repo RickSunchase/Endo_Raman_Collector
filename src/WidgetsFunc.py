@@ -133,7 +133,7 @@ def folder_escort():
                 '%s/拼接后' % (done_destination))
     shutil.move('./Pred %s' % (time.strftime('%Y%m%d')),
                 '%s/单独处理dr' % (done_destination))
-    shutil.move('./Mean %s' % (time.strftime('%Y%m%d')),
+    shutil.move('./Avg %s' % (time.strftime('%Y%m%d')),
                 '%s/平均后dr' % (done_destination))
 
     # 做大标本移动图片
