@@ -16,6 +16,7 @@ from ui_CollectorWindow import Ui_CollectorWindow
 import multiprocessing
 import socket
 
+
 class MainWindow(Ui_CollectorWindow, QWidget):
     chageCharts = pyqtSignal()
     specEraser = pyqtSignal(int)
@@ -158,6 +159,7 @@ class MainWindow(Ui_CollectorWindow, QWidget):
             worker.finished.connect(worker.deleteLater)
             worker.start()
         self.receiver.unlockGanger.connect(self.ganger.sendsig)
+        self.receiver.finished.connect(self.receiver.deleteLater)
         self.pushButton_stop.clicked.connect(self.receiver.stopsig)
         self.pushButton_stop.clicked.connect(self.ganger.stopsig)
         self.pushButton_stop.clicked.connect(
@@ -166,11 +168,6 @@ class MainWindow(Ui_CollectorWindow, QWidget):
             lambda: self.pushButton_start.setEnabled(True))
         self.receiver.start()
         self.ganger.start()
-
-        # receiver.exec()
-        # ganger.exec()
-        # for worker in self.workers:
-        #     worker.exec()
 
     def closeEvent(self, Event):
         try:

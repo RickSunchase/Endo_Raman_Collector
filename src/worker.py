@@ -1,7 +1,7 @@
 from os import PathLike
 import os.path
 from PyQt6.QtWidgets import *
-from PyQt6.QtCore import QThread, pyqtSignal, QMutexLocker, QMutex, QSemaphore, QMetaType
+from PyQt6.QtCore import QThread, pyqtSignal, QMutexLocker, QMutex, QSemaphore
 from queue import Queue
 import numpy as np
 import rampy as rp
@@ -58,8 +58,10 @@ class Worker(QThread):
     def on_save(self, savegroup):
         with QMutexLocker(self.mutex):
             if self.loaded and self.filename.startswith(savegroup):
-                saveFile(self.filename, self.dst, self.pref, self.catedSpec)
-                saveFile(self.filename, self.pdst, self.pref, self.predSpec)
+                saveFile(self.filename, self.dst,
+                         self.pref, self.catedSpec)
+                saveFile(self.filename, self.pdst,
+                         self.pref, self.predSpec)
                 roil = np.array([[i, i+500] for i in range(0, 4000, 500)])
                 spec = self.catedSpec.copy().transpose()
                 spec[1, :] = rp.baseline(spec[0, :], spec[1, :], roil, 'drPLS',

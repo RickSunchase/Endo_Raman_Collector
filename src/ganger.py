@@ -22,11 +22,19 @@ class Ganger(QThread):
 
     def run(self):
         while not self.stopFlag:
-            if not self.__lock.tryLock(7):
-                continue
-            if self.signin.tryAcquire(1, 7):
-                self.__udpSender.sendto(
-                    'c'.encode('gbk'), ('127.0.0.1', 52169))
+            while not self.stopFlag:
+                if self.__lock.tryLock(7):
+                    break
+                else:
+                    continue
+            while not self.stopFlag:
+                if self.signin.tryAcquire(1, 7):
+                    self.signin.release()
+                    self.__udpSender.sendto(
+                        'c'.encode('gbk'), ('127.0.0.1', 52169))
+                    break
+                else:
+                    continue
         return
 
     def __del__(self):

@@ -54,7 +54,6 @@ class Receiver(QThread):
                 allfiles = glob.glob(self.obsPath+'\\*.txt')
                 allfiles.sort(key=lambda x: x[-19:], reverse=True)
                 newest = allfiles[0]
-                self.tasks.put(newest)
                 if prefile and not newest.startswith(prefile):
                     # 不一样就发送信号让打工人存盘
                     n = 9 - self.signin.available()
@@ -64,13 +63,13 @@ class Receiver(QThread):
                     msaver.meanQ = self.meanQ
                     self.saveFileSignal.emit(os.path.split(prefile)[1])
                     msaver.start()
-
+                self.tasks.put(newest)
+                self.signin.acquire(1)
                 prefile = newest[:-13]
                 self.unlockGanger.emit()
         return
 
     def __del__(self):
-        # self.udpServer.close()
         print('收发室关门')
 
     class Msaver(multiprocessing.Process):
@@ -97,7 +96,7 @@ class Receiver(QThread):
             spec[1, :] = rp.smooth(spec[0, :], spec[1, :],  Lambda=500)
             spec[1, :] = norm_Area(spec[1, :])
             saveFile(self.fname, self.dst, pref, spec.transpose())
-            return
+            del self
 
         def __del__(self):
             print('进程自己退出')
