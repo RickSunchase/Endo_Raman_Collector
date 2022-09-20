@@ -61,6 +61,9 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         self.udpServer.settimeout(7)
         self.udpServer.bind(('127.0.0.1', 7219))
         Receiver.udpServer = self.udpServer
+        self.pushButton_del.setIcon(
+            QIcon(os.path.split(os.path.realpath(__file__))[0]+'\\..\\img\\usertrashfull_92826.svg'))
+        os.path.split(os.path.realpath(__file__))[0]+'\\..\\img\\'
 
     # 用信号改变上面两个视图
     def change_O_C_Charts(self):
@@ -178,7 +181,8 @@ class MainWindow(Ui_CollectorWindow, QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon("./img/accessibility.ico"))
+    app.setWindowIcon(
+        QIcon(os.path.split(os.path.realpath(__file__))[0]+'\\..\\img\\accessibility.ico'))
     window = MainWindow()
     window.show()
     sys.exit(app.exec())

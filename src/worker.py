@@ -104,15 +104,10 @@ class Worker(QThread):
                 originSpec = np.loadtxt(targetFile, skiprows=3)
                 with open(targetFile, 'r') as f:
                     self.pref = [f.readline(), f.readline()]
-                spec = np.delete(originSpec.transpose(), 1002, axis=1)
+                spec = np.delete(originSpec.copy().transpose(), 1002, axis=1)
                 spec[1, :] = cat_spec(spec[1, :], [1002, 1960])
                 self.catedSpec = spec.copy().transpose()
 
-                with QMutexLocker(self.plotLock):
-                    self.originQueue.put(originSpec)
-                    self.catQueue.put(self.catedSpec)
-                    self.sendUpper.emit()
-                self.catsQueue.put(self.catedSpec)
 
                 roil = np.array([[i, i+500] for i in range(0, 4000, 500)])
                 spec[1, :] = rp.baseline(spec[0, :], spec[1, :], roil, 'drPLS',
@@ -123,8 +118,13 @@ class Worker(QThread):
                 self.predSpec = spec.copy().transpose()
 
                 # 发送两个Series的信号
-                self.predQueue.put(self.predSpec)
-                self.sendLower.emit(self.id)
+                with QMutexLocker(self.plotLock):
+                    self.originQueue.put(originSpec)
+                    self.catQueue.put(self.catedSpec)
+                    self.sendUpper.emit()
+                    self.catsQueue.put(self.catedSpec)
+                    self.predQueue.put(self.predSpec)
+                    self.sendLower.emit(self.id)
                 self.setTable.emit(self.id, self.filename)
                 self.buttonEnable.emit(True)
 
