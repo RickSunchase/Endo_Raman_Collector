@@ -80,10 +80,10 @@ class MainWindow(Ui_CollectorWindow, QWidget):
 
     def change_C_P_Series(self, index):
         pen = QPen()
-        pen.setWidth(2)
         pen.setColor(self.colorList[index])
         self.cSeriesList[index] = array2Lseries(self.catsQueue.get())
         self.cSeriesList[index].setPen(pen)
+        pen.setWidthF(1.5)
         self.pSeriesList[index] = array2Lseries(self.predQueue.get())
         self.pSeriesList[index].setPen(pen)
         self.cAllChart.addSeries(self.cSeriesList[index])
