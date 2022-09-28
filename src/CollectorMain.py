@@ -83,7 +83,7 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         pen.setColor(self.colorList[index])
         self.cSeriesList[index] = array2Lseries(self.catsQueue.get())
         self.cSeriesList[index].setPen(pen)
-        pen.setWidthF(1.5)
+        pen.setWidthF(1.7)
         self.pSeriesList[index] = array2Lseries(self.predQueue.get())
         self.pSeriesList[index].setPen(pen)
         self.cAllChart.addSeries(self.cSeriesList[index])
