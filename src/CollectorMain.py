@@ -21,6 +21,8 @@ class MainWindow(Ui_CollectorWindow, QWidget):
     chageCharts = pyqtSignal()
     specEraser = pyqtSignal(int)
     changeSeries = pyqtSignal(int)
+    blacked = pyqtSignal(int)
+    unBlacked = pyqtSignal(int)
 
     def __init__(self):
         super().__init__()
@@ -47,6 +49,18 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         self.btns = [self.pushButton_1, self.pushButton_2, self.pushButton_3,
                      self.pushButton_4, self.pushButton_5, self.pushButton_6,
                      self.pushButton_7, self.pushButton_8, self.pushButton_9]
+
+        self.blacked.connect(self.zzzq)
+        self.unBlacked.connect(self.zzbzq)
+        self.btns[0].clicked.connect(lambda: self.delCheck(0))
+        self.btns[1].clicked.connect(lambda: self.delCheck(1))
+        self.btns[2].clicked.connect(lambda: self.delCheck(2))
+        self.btns[3].clicked.connect(lambda: self.delCheck(3))
+        self.btns[4].clicked.connect(lambda: self.delCheck(4))
+        self.btns[5].clicked.connect(lambda: self.delCheck(5))
+        self.btns[6].clicked.connect(lambda: self.delCheck(6))
+        self.btns[7].clicked.connect(lambda: self.delCheck(7))
+        self.btns[8].clicked.connect(lambda: self.delCheck(8))
         self.colorList = [QColor('#F44A4D'), QColor('#5E38E0'),
                           QColor('#DEA537'), QColor('#42FFF6'),
                           QColor('#9FFF40'),
@@ -65,7 +79,26 @@ class MainWindow(Ui_CollectorWindow, QWidget):
             QIcon(os.path.split(os.path.realpath(__file__))[0]+'\\..\\img\\usertrashfull_92826.svg'))
         os.path.split(os.path.realpath(__file__))[0]+'\\..\\img\\'
 
-    # 用信号改变上面两个视图
+    def delCheck(self, n: int) -> None:
+        if self.btns[n].isChecked():
+            self.blacked.emit(n)
+        else:
+            self.unBlacked.emit(n)
+
+    def zzzq(self, n: int) -> None:
+        pass
+        pen = QPen()
+        pen.setColor(QColor(128, 128, 128))  # 切换为纯白色
+        self.cSeriesList[n].setPen(pen)
+        self.pSeriesList[n].setPen(pen)
+
+    def zzbzq(self, n: int) -> None:
+        pen = QPen()
+        pen.setColor(self.colorList[n])  # 切换回原始颜色
+        self.cSeriesList[n].setPen(pen)
+        self.pSeriesList[n].setPen(pen)
+        # 用信号改变上面两个视图
+
     def change_O_C_Charts(self):
         oChart = QChart()
         oSeries = array2Lseries(self.originQueue.get())
@@ -155,6 +188,7 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         self.ganger = Ganger()
         for worker in self.workers:
             worker.buttonEnable.connect(self.btns[worker.id].setEnabled)
+            worker.buttonUnCheck.connect(self.btns[worker.id].setChecked)
             self.pushButton_stop.clicked.connect(worker.stopsig)
             self.receiver.saveFileSignal.connect(worker.savesig)
             worker.sendUpper.connect(self.chageCharts)
@@ -162,6 +196,8 @@ class MainWindow(Ui_CollectorWindow, QWidget):
             worker.deleteLower.connect(self.specEraser)
             worker.setTable.connect(
                 lambda r, f: self.tableWidget.setItem(r, 0, QTableWidgetItem(f)))
+            worker.setTable.connect(
+                lambda r, f: self.tableWidget.item(r, 0).setTextAlignment(Qt.AlignmentFlag.AlignCenter))
             worker.finished.connect(worker.deleteLater)
             worker.start()
         self.receiver.unlockGanger.connect(self.ganger.sendsig)

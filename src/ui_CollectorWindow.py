@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_CollectorWindow(object):
     def setupUi(self, CollectorWindow):
         CollectorWindow.setObjectName("CollectorWindow")
-        CollectorWindow.resize(981, 1259)
+        CollectorWindow.resize(970, 1247)
         font = QtGui.QFont()
         CollectorWindow.setFont(font)
         CollectorWindow.setStyleSheet("QWidget:window {\n"

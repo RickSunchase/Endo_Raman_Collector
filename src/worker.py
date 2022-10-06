@@ -25,6 +25,7 @@ class Worker(QThread):
     stopsig = pyqtSignal()
     setTable = pyqtSignal(int, str)
     buttonEnable = pyqtSignal(bool)
+    buttonUnCheck = pyqtSignal(bool)
     originQueue: Queue
     catsQueue: Queue
     catQueue: Queue
@@ -130,6 +131,7 @@ class Worker(QThread):
 
             self.chair.lock()
             self.buttonEnable.emit(False)
+            self.buttonUnCheck.emit(False)
         return
 
     def __del__(self):
