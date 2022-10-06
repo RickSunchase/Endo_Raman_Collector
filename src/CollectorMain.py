@@ -88,7 +88,7 @@ class MainWindow(Ui_CollectorWindow, QWidget):
     def zzzq(self, n: int) -> None:
         pass
         pen = QPen()
-        pen.setColor(QColor(128, 128, 128))  # 切换为纯白色
+        pen.setColor(QColor(128, 128, 128 ,62))  # 切换为纯白色
         self.cSeriesList[n].setPen(pen)
         self.pSeriesList[n].setPen(pen)
 
