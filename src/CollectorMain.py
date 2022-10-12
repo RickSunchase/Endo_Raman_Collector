@@ -96,6 +96,7 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         pen = QPen()
         pen.setColor(self.colorList[n])  # 切换回原始颜色
         self.cSeriesList[n].setPen(pen)
+        pen.setWidthF(1.7)
         self.pSeriesList[n].setPen(pen)
         # 用信号改变上面两个视图
 
