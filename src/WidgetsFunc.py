@@ -16,7 +16,7 @@ import os
 def saveFile(filename: str, path: str, prefix: list[str], spec: np.ndarray):
     dst = path+'/'+filename
     np.savetxt(dst, spec, fmt=['%.3f', '%f'], delimiter='\t',
-               header=prefix[0]+prefix[1]+'\n', encoding='gbk', comments='')
+               header=prefix[0]+prefix[1], encoding='utf', comments='')
 
 
 def array2Lseries(spec: np.ndarray) -> QLineSeries:
@@ -135,6 +135,9 @@ def folder_escort():
                 '%s/单独处理dr' % (done_destination))
     shutil.move('./Avg %s' % (time.strftime('%Y%m%d')),
                 '%s/平均后dr' % (done_destination))
+    shutil.move('./Rough %s' % (time.strftime('%Y%m%d')),
+                '%s/未平滑dr' % (done_destination))
+
 
     # 做大标本移动图片
     if xingqi % 2 == 0:

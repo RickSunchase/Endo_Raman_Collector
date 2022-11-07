@@ -17,6 +17,7 @@ class Worker(QThread):
     signin: QSemaphore
     dst: PathLike
     pdst: PathLike
+    rdst: PathLike
     obsPath: PathLike
     standup = pyqtSignal()
     sendUpper = pyqtSignal()
@@ -41,6 +42,7 @@ class Worker(QThread):
         self.loaded = False
         self.catedSpec: np.ndarray
         self.predSpec: np.ndarray
+        self.roughSpec: np.ndarray
         self.mutex = QMutex()
         self.chair = QMutex()
         self.chair.lock()  # 初始锁上，线程才能休息
@@ -59,10 +61,9 @@ class Worker(QThread):
     def on_save(self, savegroup):
         with QMutexLocker(self.mutex):
             if self.loaded and self.filename.startswith(savegroup):
-                saveFile(self.filename, self.dst,
-                         self.pref, self.catedSpec)
-                saveFile(self.filename, self.pdst,
-                         self.pref, self.predSpec)
+                saveFile(self.filename, self.dst,  self.pref, self.catedSpec)
+                saveFile(self.filename, self.pdst, self.pref, self.predSpec)
+                saveFile(self.filename, self.rdst, self.pref, self.roughSpec)
                 roil = np.array([[i, i+500] for i in range(0, 4000, 500)])
                 spec = self.catedSpec.copy().transpose()
                 spec[1, :] = rp.baseline(spec[0, :], spec[1, :], roil, 'drPLS',
@@ -109,11 +110,14 @@ class Worker(QThread):
                 spec[1, :] = cat_spec(spec[1, :], [1002, 1960])
                 self.catedSpec = spec.copy().transpose()
 
-
                 roil = np.array([[i, i+500] for i in range(0, 4000, 500)])
                 spec[1, :] = rp.baseline(spec[0, :], spec[1, :], roil, 'drPLS',
                                          lam=9.7e7, ratio=0.0047)[0].reshape(-1,)
                 spec = specSplit(spec, 800, 1800)
+                roughSpecTemp = spec.copy()
+                roughSpecTemp[1, :] = norm_Area(spec[1, :])
+                self.roughSpec = roughSpecTemp.copy().transpose()
+
                 spec[1, :] = rp.smooth(spec[0, :], spec[1, :], Lambda=500)
                 spec[1, :] = norm_Area(spec[1, :])
                 self.predSpec = spec.copy().transpose()

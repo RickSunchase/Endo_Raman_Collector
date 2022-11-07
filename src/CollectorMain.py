@@ -34,6 +34,8 @@ class MainWindow(Ui_CollectorWindow, QWidget):
             + f'Pred {datetime.now().strftime("%Y%m%d")}'
         self.avgPath = f'C:\\Users\\{getpass.getuser()}\\Desktop\\'\
             + f'Avg {datetime.now().strftime("%Y%m%d")}'
+        self.roughPath = f'C:\\Users\\{getpass.getuser()}\\Desktop\\'\
+            + f'Rough {datetime.now().strftime("%Y%m%d")}'
         self.cAllChart = QChart()
         self.pAllChart = QChart()
         self.catedsView.setChart(self.cAllChart)
@@ -158,7 +160,9 @@ class MainWindow(Ui_CollectorWindow, QWidget):
             os.makedirs(self.predPath)
         if not os.path.exists(self.avgPath):
             os.makedirs(self.avgPath)
-        # 打开并创建文件夹，就不打开了
+        if not os.path.exists(self.roughPath):
+            os.makedirs(self.roughPath)
+        # 打开并创建文件夹，就不打开了):
 
         post = QSemaphore(0)
         Worker.signin = post
@@ -173,6 +177,7 @@ class MainWindow(Ui_CollectorWindow, QWidget):
         Worker.dst = self.catPath
         Worker.pdst = self.predPath
         Worker.obsPath = self.obsPath
+        Worker.rdst = self.roughPath
         Worker.originQueue = self.originQueue
         Worker.catQueue = self.catQueue
         Worker.catsQueue = self.catsQueue
