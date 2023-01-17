@@ -63,6 +63,8 @@ class Receiver(QThread):
                     msaver.meanQ = self.meanQ
                     self.saveFileSignal.emit(os.path.split(prefile)[1])
                     msaver.start()
+                elif self.signin.available() ==0:
+                    continue # skip不存档且没位置就返回，不执行下面的,权当没这个东西
                 self.tasks.put(newest)
                 self.signin.acquire(1)
                 prefile = newest[:-13]
