@@ -132,12 +132,11 @@ def folder_escort():
     shutil.move('./Cated %s' % (time.strftime('%Y%m%d')),
                 '%s/拼接后' % (done_destination))
     shutil.move('./Pred %s' % (time.strftime('%Y%m%d')),
-                '%s/单独处理dr' % (done_destination))
+                '%s/单独处理ds' % (done_destination))
     shutil.move('./Avg %s' % (time.strftime('%Y%m%d')),
-                '%s/平均后dr' % (done_destination))
+                '%s/平均后ds' % (done_destination))
     shutil.move('./Rough %s' % (time.strftime('%Y%m%d')),
-                '%s/未平滑dr' % (done_destination))
-
+                '%s/未平滑ds' % (done_destination))
 
     # 做大标本移动图片
     if xingqi % 2 == 0:

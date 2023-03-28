@@ -19,13 +19,12 @@ class Receiver(QThread):
     unlockGanger = pyqtSignal()
     meanQ: multiprocessing.Queue
     signin: QSemaphore
-    udpServer:socket.socket
+    udpServer: socket.socket
 
     def __init__(self):
         super().__init__()
         self.stopFlag = False
         self.stopsig.connect(self.on_stop)
-
 
     def on_stop(self):
         self.stopFlag = True
@@ -63,8 +62,8 @@ class Receiver(QThread):
                     msaver.meanQ = self.meanQ
                     self.saveFileSignal.emit(os.path.split(prefile)[1])
                     msaver.start()
-                elif self.signin.available() ==0:
-                    continue # skip不存档且没位置就返回，不执行下面的,权当没这个东西
+                elif self.signin.available() == 0:
+                    continue  # skip不存档且没位置就返回，不执行下面的,权当没这个东西
                 self.tasks.put(newest)
                 self.signin.acquire(1)
                 prefile = newest[:-13]
@@ -95,7 +94,7 @@ class Receiver(QThread):
             if self.n > 1:
                 spec[1, :] = np.mean(datas, axis=0)
             spec = specSplit(spec, 800, 1800)
-            spec[1, :] = rp.smooth(spec[0, :], spec[1, :],  Lambda=500)
+            spec[1, :] = specSmooth(spec[0, :], spec[1, :])
             spec[1, :] = norm_Area(spec[1, :])
             saveFile(self.fname, self.dst, pref, spec.transpose())
             del self

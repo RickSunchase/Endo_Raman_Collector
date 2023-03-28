@@ -12,6 +12,8 @@ from scipy.linalg import cholesky
 from threading import Thread
 from functools import reduce
 from scipy import sparse
+from filterpy.kalman import KalmanFilter
+
 
 def find_origin(file):
     # 找到每个文件对应的原始文件的地址
@@ -71,14 +73,38 @@ def cat_spec(spec, p):
     return intense
 
 
-def specSmooth(spec):
-    # 先用现成的方法，自创的方法之后再说
-    pass
+def specSmooth(x, y):
+    y_ = rp.smooth(x, y, Lambda=500)
+    noi = y - y_
+    y2 = calman(noi)
+    return y_ + y2
+
+
+def calman(z):
+    n_iter = len(z)
+    d = np.var(z)
+    sz = (n_iter,)
+    xhat = np.zeros(sz)
+    P = np.zeros(sz)
+
+    kf = KalmanFilter(dim_x=1, dim_z=1)
+    kf.F = np.array([1])
+    kf.H = np.array([1])
+    kf.R = np.array([d])
+    kf.P = np.array([1.0])
+    kf.Q = 0.17
+    xhat[0] = 0.0
+    P[0] = 1.0
+    for k in range(1, n_iter):
+        kf.predict()
+        xhat[k] = kf.x
+        kf.update(z[k], d, np.array([1]))
+    return xhat
 
 
 def specSplit(spec: np.ndarray, start: int, end: int):
     # spec是n×2的矩阵
-    return spec[:,(end >= spec[0, :]) & (spec[0, :] >= start)]
+    return spec[:, (end >= spec[0, :]) & (spec[0, :] >= start)]
 
 
 def norm_Area(spec: np.ndarray):

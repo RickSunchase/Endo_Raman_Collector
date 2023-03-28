@@ -8,6 +8,7 @@ import rampy as rp
 from all_in_one_preprocess import *
 from WidgetsFunc import *
 import multiprocessing
+from DSTAspline import DSTAspline
 
 
 class Worker(QThread):
@@ -66,8 +67,13 @@ class Worker(QThread):
                 saveFile(self.filename, self.rdst, self.pref, self.roughSpec)
                 roil = np.array([[i, i+500] for i in range(0, 4000, 500)])
                 spec = self.catedSpec.copy().transpose()
-                spec[1, :] = rp.baseline(spec[0, :], spec[1, :], roil, 'drPLS',
-                                         lam=9.7e7, ratio=0.00047)[0].reshape(-1,)
+                # spec[1, :] = rp.baseline(spec[0, :], spec[1, :], roil, 'drPLS',
+                #                          lam=9.7e7, ratio=0.00047)[0].reshape(-1,)
+                spec = spec[:, 97:]
+                x = spec[0, :]
+                y = spec[1, :]
+                y = specSmooth(x, y)
+                spec[1, :] = spec[1, :] - DSTAspline(x, y, 9e-7)
                 self.meanQ.put((spec, self.pref))
                 self.deleteLower.emit(self.id)
                 self.setTable.emit(self.id, '')
@@ -109,16 +115,26 @@ class Worker(QThread):
                 spec = np.delete(originSpec.copy().transpose(), 1002, axis=1)
                 spec[1, :] = cat_spec(spec[1, :], [1002, 1960])
                 self.catedSpec = spec.copy().transpose()
-
+                '''
                 roil = np.array([[i, i+500] for i in range(0, 4000, 500)])
                 spec[1, :] = rp.baseline(spec[0, :], spec[1, :], roil, 'drPLS',
                                          lam=9.7e7, ratio=0.0047)[0].reshape(-1,)
+                '''
+
+                spec = spec[:, 97:]
+                x = spec[0, :]
+                y = spec[1, :]
+                y = specSmooth(x, y)
+                b = DSTAspline(x, y, 9e-7)
+                spec[1, :] = spec[1, :] - b
                 spec = specSplit(spec, 800, 1800)
                 roughSpecTemp = spec.copy()
+                spec[1, :] = y - b
+
                 roughSpecTemp[1, :] = norm_Area(spec[1, :])
                 self.roughSpec = roughSpecTemp.copy().transpose()
 
-                spec[1, :] = rp.smooth(spec[0, :], spec[1, :], Lambda=500)
+                # spec[1, :] = rp.smooth(spec[0, :], spec[1, :], Lambda=500)
                 spec[1, :] = norm_Area(spec[1, :])
                 self.predSpec = spec.copy().transpose()
 
